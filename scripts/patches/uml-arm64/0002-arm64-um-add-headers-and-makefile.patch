@@ -1,0 +1,239 @@
+From: DevBox UML arm64 Port
+Subject: [PATCH 2/4] arm64/um: add arch headers and build Makefile
+
+diff --git a/arch/arm64/um/Makefile b/arch/arm64/um/Makefile
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/Makefile
+@@ -0,0 +1,31 @@
++# SPDX-License-Identifier: GPL-2.0
++obj-y = bugs.o \
++        mem.o \
++        ptrace.o \
++        signal.o \
++        stub_segv.o \
++        sys_call_table.o \
++        syscalls.o \
++        sysrq.o \
++        task_size.o \
++        tls.o \
++        user-offsets.o
++
++obj-y  += os-Linux/
++
++UNPROFILE_OBJS := stub_segv.o
++
++# Generate user_constants.h from user-offsets.s (same mechanism as x86/um)
++$(obj)/user-offsets.s: c_flags = -Wp,-MD,$(depfile) $(USER_CFLAGS) \
++	-Iarch/arm64/include/generated
++targets += user-offsets.s
++
++include/generated/user_constants.h: $(obj)/user-offsets.s FORCE
++	$(call filechk,offsets,__USER_CONSTANT_H__)
++
++# archheaders: generate arm64-specific headers (cpucap-defs.h, sysreg-defs.h)
++# called by arch/um/Makefile archheaders rule via ARCH=$(HEADER_ARCH)
++archheaders:
++	$(Q)$(MAKE) $(build)=arch/arm64/tools kapi
++
++include $(srctree)/arch/um/scripts/Makefile.rules
+diff --git a/arch/arm64/um/os-Linux/Makefile b/arch/arm64/um/os-Linux/Makefile
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/os-Linux/Makefile
+@@ -0,0 +1,5 @@
++# SPDX-License-Identifier: GPL-2.0
++obj-y = registers.o \
++         signal.o \
++         prctl.o \
++         uaccess.o
+diff --git a/arch/arm64/um/asm/arch_regs.h b/arch/arm64/um/asm/arch_regs.h
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/asm/arch_regs.h
+@@ -0,0 +1,54 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef __UM_ARCH_REGS_ARM64_H
++#define __UM_ARCH_REGS_ARM64_H
++
++/* asm-offsets.h is generated from this very compilation unit - guard against
++ * circular inclusion when COMPILE_OFFSETS is defined (arch/um/kernel/asm-offsets.c) */
++#ifndef COMPILE_OFFSETS
++#include <generated/asm-offsets.h>
++#endif
++
++/*
++ * arm64 UML host register file.
++ * Mirrors struct user_pt_regs from <asm/ptrace.h> (the native arm64 ABI).
++ * UML's ptrace layer fills this in via PTRACE_GETREGSET / NT_PRSTATUS.
++ */
++struct arch_regs {
++	unsigned long long regs[31]; /* x0 .. x30 */
++	unsigned long long sp;
++	unsigned long long pc;
++	unsigned long long pstate;
++};
++
++/* Accessors used by arch/um/kernel/regs.c */
++#define REGS_IP(r)         ((r).pc)
++#define REGS_SP(r)         ((r).sp)
++#define REGS_SET_SYSCALL_RETURN(r, res) ((r).regs[0] = (res))
++
++/* Syscall number is passed in x8 on arm64 */
++#define REGS_SYSCALL_NR(r)  ((r).regs[8])
++
++/* First 6 syscall args: x0..x5 */
++#define REGS_SYSCALL_ARG1(r) ((r).regs[0])
++#define REGS_SYSCALL_ARG2(r) ((r).regs[1])
++#define REGS_SYSCALL_ARG3(r) ((r).regs[2])
++#define REGS_SYSCALL_ARG4(r) ((r).regs[3])
++#define REGS_SYSCALL_ARG5(r) ((r).regs[4])
++#define REGS_SYSCALL_ARG6(r) ((r).regs[5])
++
++/* pstate bit that indicates the process is in syscall-entry */
++#define PSR_MODE_EL0t   0x00000000UL
++
++static inline int is_syscall(unsigned long long pstate)
++{
++	/* UML skas mode sets this flag when intercepting a syscall */
++	return 1;
++}
++
++#define HOST_TASK_REGS     offsetof(struct task_struct, thread.regs)
++#define HOST_TASK_PID      offsetof(struct task_struct, pid)
++
++/* Size of the register set when transferred via ptrace */
++#define FRAME_SIZE         sizeof(struct arch_regs)
++
++#endif /* __UM_ARCH_REGS_ARM64_H */
+diff --git a/arch/arm64/um/asm/elf.h b/arch/arm64/um/asm/elf.h
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/asm/elf.h
+@@ -0,0 +1,43 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++#ifndef __UM_ELF_ARM64_H
++#define __UM_ELF_ARM64_H
++
++#include <asm/user.h>
++
++/*
++ * ELF type / machine constant for arm64 binaries run inside UML.
++ * The guest sees a standard aarch64 ELF ABI.
++ */
++#define ELF_ARCH           EM_AARCH64
++#define ELF_CLASS          ELFCLASS64
++#define ELF_DATA           ELFDATA2LSB
++
++#define ELF_PLATFORM       "aarch64"
++
++/* arm64 has no vsyscall page */
++#define FIXADDR_USER_START     0
++#define FIXADDR_USER_END       0
++
++/* arm64 has no FPU-disable bit in AT_HWCAP that we need to mask */
++#define ELF_HWCAP          (0)
++#define ELF_HWCAP2         (0)
++
++typedef unsigned long      elf_greg_t;
++#define ELF_NGREG          34   /* 31 GPR + sp + pc + pstate */
++typedef elf_greg_t         elf_gregset_t[ELF_NGREG];
++
++/* Needed for core dumps */
++#define ELF_CORE_COPY_REGS(pr_reg, regs)				\
++	do {								\
++		int __i;						\
++		for (__i = 0; __i < 31; __i++)				\
++			(pr_reg)[__i] = (regs)->regs.regs[__i];		\
++		(pr_reg)[31] = (regs)->regs.sp;				\
++		(pr_reg)[32] = (regs)->regs.pc;				\
++		(pr_reg)[33] = (regs)->regs.pstate;			\
++	} while (0)
++
++#define SET_PERSONALITY(ex)   do { } while (0)
++#define ARCH_HAS_SETUP_ADDITIONAL_PAGES 0
++
++#endif /* __UM_ELF_ARM64_H */
+diff --git a/arch/arm64/um/asm/ptrace.h b/arch/arm64/um/asm/ptrace.h
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/asm/ptrace.h
+@@ -0,0 +1,22 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * arm64/um/asm/ptrace.h — included as <asm/ptrace.h> for ARCH=um SUBARCH=arm64
++ *
++ * Must pull in ptrace-generic.h which defines struct pt_regs for UML.
++ * The native arm64 ptrace.h is not suitable here.
++ */
++#ifndef __UM_PTRACE_ARM64_H
++#define __UM_PTRACE_ARM64_H
++
++/* Pull in UML common ptrace defs: struct pt_regs, EMPTY_REGS, etc. */
++#include <asm/ptrace-generic.h>
++
++/* arm64-specific extras not in ptrace-generic.h */
++#define PT_FIX_EXEC_STACK(sp)  do { } while (0)
++
++#define user_stack_pointer(regs)   UPT_SP(&(regs)->regs)
++#define profile_pc(regs)           instruction_pointer(regs)
++
++#define MAX_REG_OFFSET  (offsetof(struct uml_pt_regs, fp))
++
++#endif /* __UM_PTRACE_ARM64_H */
+diff --git a/arch/arm64/um/user-offsets.c b/arch/arm64/um/user-offsets.c
+new file mode 100644
+--- /dev/null
++++ b/arch/arm64/um/user-offsets.c
+@@ -0,0 +1,50 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * arch/arm64/um/user-offsets.c
++ * Generates include/generated/user_constants.h via the offsets mechanism.
++ * Defines HOST_* constants that encode arm64 register layout for UML.
++ */
++#include <stdio.h>
++#include <stddef.h>
++#include <signal.h>
++#include <poll.h>
++#include <sys/mman.h>
++#include <asm/ptrace.h>
++#include <asm/types.h>
++#include <linux/kbuild.h>
++
++/* suppress -Wmissing-prototypes */
++void foo(void);
++
++void foo(void)
++{
++	/*
++	 * struct user_pt_regs layout (NT_PRSTATUS):
++	 *   regs[31]  = x0..x30   (offsets 0..240, step 8)
++	 *   sp        = offset 248 → index 31
++	 *   pc        = offset 256 → index 32
++	 *   pstate    = offset 264 → index 33
++	 */
++	DEFINE(HOST_SP,      offsetof(struct user_pt_regs, sp)     / sizeof(unsigned long));
++	DEFINE(HOST_PC,      offsetof(struct user_pt_regs, pc)     / sizeof(unsigned long));
++	DEFINE(HOST_PSTATE,  offsetof(struct user_pt_regs, pstate) / sizeof(unsigned long));
++
++	/*
++	 * struct user_fpsimd_state layout (NT_PRFPREG):
++	 *   vregs[32]   = 512 bytes
++	 *   fpsr + fpcr = 8 bytes
++	 *   __reserved  = 8 bytes
++	 *   Total: 528 bytes → 66 unsigned longs
++	 */
++	DEFINE(HOST_FP_SIZE, sizeof(struct user_fpsimd_state) / sizeof(unsigned long));
++
++	DEFINE(UM_FRAME_SIZE, sizeof(struct user_pt_regs));
++
++	DEFINE(UM_POLLIN,    POLLIN);
++	DEFINE(UM_POLLPRI,   POLLPRI);
++	DEFINE(UM_POLLOUT,   POLLOUT);
++
++	DEFINE(UM_PROT_READ,  PROT_READ);
++	DEFINE(UM_PROT_WRITE, PROT_WRITE);
++	DEFINE(UM_PROT_EXEC,  PROT_EXEC);
++}
+
