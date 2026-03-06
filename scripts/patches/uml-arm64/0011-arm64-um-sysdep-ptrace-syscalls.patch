@@ -5,11 +5,12 @@ diff --git a/arch/arm64/um/shared/sysdep/ptrace.h b/arch/arm64/um/shared/sysdep/
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/ptrace.h
-@@ -0,0 +1,72 @@
+@@ -0,0 +1,73 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __SYSDEP_ARM64_PTRACE_H
 +#define __SYSDEP_ARM64_PTRACE_H
 +
++#include <sysdep/faultinfo.h>
 +#include <sysdep/ptrace_user.h>
 +
 +/*

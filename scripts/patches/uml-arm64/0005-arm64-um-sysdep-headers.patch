@@ -42,14 +42,15 @@ diff --git a/arch/arm64/um/shared/sysdep/stub.h b/arch/arm64/um/shared/sysdep/st
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/stub.h
-@@ -0,0 +1,103 @@
+@@ -0,0 +1,104 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __SYSDEP_STUB_ARM64_H
 +#define __SYSDEP_STUB_ARM64_H
 +
-+#include <stddef.h>
 +#include <asm/unistd.h>
-+#include <generated/asm-offsets.h>
++#include <as-layout.h>
++#include <stub-data.h>
++#include <linux/stddef.h>
 +
 +/*
 + * arm64 inline syscall helpers for the UML stub.

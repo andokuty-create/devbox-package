@@ -5,23 +5,22 @@ diff --git a/arch/arm64/um/os-Linux/registers.c b/arch/arm64/um/os-Linux/registe
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/os-Linux/registers.c
-@@ -0,0 +1,117 @@
+@@ -0,0 +1,116 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * arch/arm64/um/os-Linux/registers.c — host-side register access for UML arm64.
 + */
 +
++#include <errno.h>
++#include <string.h>
++#include <stdlib.h>
 +#include <sys/ptrace.h>
 +#include <sys/uio.h>
 +#include <sys/user.h>
 +#include <elf.h>
-+#include <errno.h>
-+#include <string.h>
-+#include <stdlib.h>
 +#include "os.h"
 +#include "registers.h"
 +#include "skas/skas.h"
-+#include <longjmp.h>
 +#include <sysdep/archsetjmp.h>
 +#include <sysdep/ptrace_user.h>
 +
