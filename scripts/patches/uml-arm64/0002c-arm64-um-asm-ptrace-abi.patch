@@ -19,8 +19,8 @@ Subject: [PATCH] arm64/um: add asm/ptrace-abi.h stub
 +#define PTRACE_SET_THREAD_AREA  26
 +
 +static inline long ptrace_get_thread_area(struct task_struct *t,
-+			int idx, struct user_desc __user *info) { return -EIO; }
++			int idx, void __user *info) { return -EIO; }
 +static inline long ptrace_set_thread_area(struct task_struct *t,
-+			int idx, struct user_desc __user *info) { return -EIO; }
++			int idx, void __user *info) { return -EIO; }
 +
 +#endif /* __UM_ASM_ARM64_PTRACE_ABI_H */

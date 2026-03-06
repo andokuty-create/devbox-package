@@ -144,33 +144,3 @@ Subject: [PATCH 7/13] um/os-Linux/skas/process.c: arm64 compat + PTRACE_SYSCALL 
  			case SIGTRAP:
  				relay_signal(SIGTRAP, (struct siginfo *)&si, regs);
 
-@@ -476,7 +496,11 @@ static inline void arm64_neutralize_syscall(int pid, struct uml_pt_regs *regs)
- void new_thread(void *stack, jmp_buf *buf, void (*handler)(void))
- {
--	(*buf)[0].JB_IP = (unsigned long) handler;
--	(*buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE -
--		sizeof(void *);
-+#ifdef __aarch64__
-+	((unsigned long *)buf)[JB_IP] = (unsigned long) handler;
-+	((unsigned long *)buf)[JB_SP] = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
-+#else
-+	(*buf)[0].JB_IP = (unsigned long) handler;
-+	(*buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
-+#endif
- }
- 
-@@ -515,7 +541,11 @@ int start_idle_thread(void *stack, jmp_buf *switch_buf)
- 	case INIT_JMP_NEW_THREAD:
--		(*switch_buf)[0].JB_IP = (unsigned long) uml_finishsetup;
--		(*switch_buf)[0].JB_SP = (unsigned long) stack +
--			UM_THREAD_SIZE - sizeof(void *);
-+#ifdef __aarch64__
-+		((unsigned long *)switch_buf)[JB_IP] = (unsigned long) uml_finishsetup;
-+		((unsigned long *)switch_buf)[JB_SP] = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
-+#else
-+		(*switch_buf)[0].JB_IP = (unsigned long) uml_finishsetup;
-+		(*switch_buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
-+#endif
- 		break;
- 	case INIT_JMP_CALLBACK:
- 		(*cb_proc)(cb_arg);

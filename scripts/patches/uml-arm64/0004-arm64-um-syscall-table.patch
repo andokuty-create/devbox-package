@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/sys_call_table.c b/arch/arm64/um/sys_call_table.c
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/sys_call_table.c
-@@ -0,0 +1,38 @@
+@@ -0,0 +1,36 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * arch/arm64/um/sys_call_table.c
@@ -30,17 +30,15 @@ new file mode 100644
 +#include <linux/syscalls.h>
 +#include <asm/unistd.h>
 +
-+#define __SYSCALL(nr, sym)  [nr] = (sys_call_ptr_t)sym,
++/* arm64 and UML-arm64 share asm-generic syscall numbers */
++#undef __SYSCALL
 +
-+/*
-+ * Reuse the generic syscall table — arm64 and UML-arm64 share the same
-+ * __NR_* numbers (both derive from asm-generic/unistd.h).
-+ */
-+#undef  __NR_syscalls
-+#include <asm-generic/unistd.h>
++extern asmlinkage long sys_ni_syscall(void);
++typedef long (*sys_call_ptr_t)(const struct pt_regs *);
 +
-+const sys_call_ptr_t sys_call_table[__NR_syscalls] = {
-+	[0 ... __NR_syscalls - 1] = (sys_call_ptr_t)sys_ni_syscall,
-+#define __SYSCALL(nr, sym)  [nr] = (sys_call_ptr_t)sym,
++#define __SYSCALL(nr, sym) [nr] = (sys_call_ptr_t)sym,
++
++const sys_call_ptr_t sys_call_table[] = {
++	[0 ... 500] = (sys_call_ptr_t)sys_ni_syscall,
 +#include <asm-generic/unistd.h>
 +};
