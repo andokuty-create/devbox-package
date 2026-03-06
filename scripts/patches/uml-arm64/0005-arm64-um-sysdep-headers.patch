@@ -42,7 +42,7 @@ diff --git a/arch/arm64/um/shared/sysdep/stub.h b/arch/arm64/um/shared/sysdep/st
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/stub.h
-@@ -0,0 +1,105 @@
+@@ -0,0 +1,107 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __SYSDEP_STUB_ARM64_H
 +#define __SYSDEP_STUB_ARM64_H
@@ -146,6 +146,8 @@ new file mode 100644
 +	__asm__ volatile("mov %0, sp" : "=r"(sp));
 +	return (void *)(sp & ~(STUB_DATA_PAGES * UM_KERN_PAGE_SIZE - 1));
 +}
++
++extern void stub_syscall_handler(void);
 +
 +#endif /* __SYSDEP_STUB_ARM64_H */
 diff --git a/arch/arm64/um/shared/sysdep/ptrace_user.h b/arch/arm64/um/shared/sysdep/ptrace_user.h

@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/shared/sysdep/ptrace.h b/arch/arm64/um/shared/sysdep/
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/ptrace.h
-@@ -0,0 +1,73 @@
+@@ -0,0 +1,77 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __SYSDEP_ARM64_PTRACE_H
 +#define __SYSDEP_ARM64_PTRACE_H
@@ -74,6 +74,10 @@ new file mode 100644
 +#define UPT_IP(r)      UPT_PC(r)
 +
 +/* PT_REGS_SP/IP/RESTART_SYSCALL/SYSCALL_NR defined by ptrace-generic.h */
++
++/* arm64: syscall return value in x0 (gp.regs[0]) */
++#define PT_REGS_SET_SYSCALL_RETURN(r, res) \
++	((r)->regs.gp.regs[0] = (res))
 +
 +
 +extern void arch_init_registers(int pid);

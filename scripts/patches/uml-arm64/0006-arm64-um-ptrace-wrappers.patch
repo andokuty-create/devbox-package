@@ -114,9 +114,9 @@ new file mode 100644
 +{
 +	switch (reg) {
 +	case HOST_PC:
-+		return (*buf)[JB_IP];
++		return (*buf)[0].__jmpbuf[JB_IP];
 +	case HOST_SP:
-+		return (*buf)[JB_SP];
++		return (*buf)[0].__jmpbuf[JB_SP];
 +	default:
 +		printk(UM_KERN_ERR "get_thread_reg: unknown reg %d\n", reg);
 +		return 0;
