@@ -75,9 +75,9 @@ new file mode 100644
 +
 +/* PT_REGS_SP/IP/RESTART_SYSCALL/SYSCALL_NR defined by ptrace-generic.h */
 +
-+/* arm64: syscall return value in x0 (gp.regs[0]) */
++/* arm64: syscall return value in x0 = gp[0] */
 +#define PT_REGS_SET_SYSCALL_RETURN(r, res) \
-+	((r)->regs.gp.regs[0] = (res))
++	((r)->regs.gp[0] = (res))
 +
 +
 +extern void arch_init_registers(int pid);

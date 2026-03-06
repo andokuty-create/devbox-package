@@ -62,6 +62,9 @@ new file mode 100644
 +#define STUB_MMAP_NR  __NR_mmap
 +#define MMAP_OFFSET(o) (o)
 +
++/* SIGSEGV handler in stub (defined in stub_segv.c, lives at STUB_CODE) */
++extern void stub_segv_handler(int sig, siginfo_t *info, void *p);
++
 +static __always_inline long stub_syscall0(long syscall)
 +{
 +	register long x8 __asm__("x8") = syscall;
@@ -249,8 +252,8 @@ new file mode 100644
 +
 +typedef struct __jmp_buf jmp_buf[1];
 +
-+#define JB_IP 11   /* x30/lr in aarch64 glibc jmp_buf */
-+#define JB_SP 12   /* sp in aarch64 glibc jmp_buf */
++#define JB_IP lr   /* x30/lr field in struct __jmp_buf */
++#define JB_SP sp   /* sp field in struct __jmp_buf */
 +
 +#endif /* __ARCHSETJMP_ARM64_H */
 

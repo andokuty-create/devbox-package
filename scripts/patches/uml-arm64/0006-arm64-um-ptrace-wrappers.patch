@@ -24,6 +24,9 @@ new file mode 100644
 +#include <sysdep/archsetjmp.h>
 +#include <sysdep/ptrace_user.h>
 +
++/* Forward declarations — used by arch/um/os-Linux/skas/process.c */
++int save_registers(int pid, struct uml_pt_regs *regs);
++int restore_registers(int pid, struct uml_pt_regs *regs);
 +/* ── GP register access (struct user_pt_regs via NT_PRSTATUS) ─────────────── */
 +
 +int save_registers(int pid, struct uml_pt_regs *regs)
@@ -114,9 +117,9 @@ new file mode 100644
 +{
 +	switch (reg) {
 +	case HOST_PC:
-+		return (*buf)[0].__jmpbuf[JB_IP];
++		return (*buf)[0].JB_IP;
 +	case HOST_SP:
-+		return (*buf)[0].__jmpbuf[JB_SP];
++		return (*buf)[0].JB_SP;
 +	default:
 +		printk(UM_KERN_ERR "get_thread_reg: unknown reg %d\n", reg);
 +		return 0;
