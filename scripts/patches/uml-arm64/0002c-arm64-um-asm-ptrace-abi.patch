@@ -3,7 +3,7 @@ Subject: [PATCH] arm64/um: add asm/ptrace-abi.h stub
 
 --- /dev/null
 +++ b/arch/arm64/um/asm/ptrace-abi.h
-@@ -0,0 +1,10 @@
+@@ -0,0 +1,20 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + * arch/arm64/um/asm/ptrace-abi.h
@@ -13,4 +13,14 @@ Subject: [PATCH] arm64/um: add asm/ptrace-abi.h stub
 + */
 +#ifndef __UM_ASM_ARM64_PTRACE_ABI_H
 +#define __UM_ASM_ARM64_PTRACE_ABI_H
++
++/* arm64 does not have a GDT/TLS thread-area; provide stubs */
++#define PTRACE_GET_THREAD_AREA  25
++#define PTRACE_SET_THREAD_AREA  26
++
++static inline long ptrace_get_thread_area(struct task_struct *t,
++			int idx, struct user_desc __user *info) { return -EIO; }
++static inline long ptrace_set_thread_area(struct task_struct *t,
++			int idx, struct user_desc __user *info) { return -EIO; }
++
 +#endif /* __UM_ASM_ARM64_PTRACE_ABI_H */

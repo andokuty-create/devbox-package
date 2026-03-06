@@ -149,7 +149,7 @@ new file mode 100644
 +	do {								\
 +		int __i;						\
 +		for (__i = 0; __i < 34; __i++)				\
-+			(pr_reg)[__i] = (regs)->gp[__i];		\
++			(pr_reg)[__i] = (regs)->regs.gp[__i];		\
 +	} while (0)
 +
 +#define SET_PERSONALITY(ex)   do { } while (0)
