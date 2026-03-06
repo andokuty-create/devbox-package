@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/Makefile b/arch/arm64/um/Makefile
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/Makefile
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,30 @@
 +# SPDX-License-Identifier: GPL-2.0
 +obj-y = bugs.o \
 +        mem.o \
@@ -16,8 +16,7 @@ new file mode 100644
 +        syscalls.o \
 +        sysrq.o \
 +        task_size.o \
-+        tls.o \
-+        user-offsets.o
++        tls.o
 +
 +obj-y  += os-Linux/
 +
@@ -37,6 +36,7 @@ new file mode 100644
 +	$(Q)$(MAKE) $(build)=arch/arm64/tools kapi
 +
 +include $(srctree)/arch/um/scripts/Makefile.rules
+
 diff --git a/arch/arm64/um/os-Linux/Makefile b/arch/arm64/um/os-Linux/Makefile
 new file mode 100644
 --- /dev/null
@@ -52,6 +52,7 @@ new file mode 100644
 +USER_OBJS := $(obj-y)
 +
 +include $(srctree)/arch/um/scripts/Makefile.rules
+
 diff --git a/arch/arm64/um/asm/arch_regs.h b/arch/arm64/um/asm/arch_regs.h
 new file mode 100644
 --- /dev/null
@@ -111,11 +112,12 @@ new file mode 100644
 +#define FRAME_SIZE         sizeof(struct arch_regs)
 +
 +#endif /* __UM_ARCH_REGS_ARM64_H */
+
 diff --git a/arch/arm64/um/asm/elf.h b/arch/arm64/um/asm/elf.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/elf.h
-@@ -0,0 +1,40 @@
+@@ -0,0 +1,43 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_ELF_ARM64_H
 +#define __UM_ELF_ARM64_H
@@ -144,6 +146,9 @@ new file mode 100644
 +#define ELF_NGREG          34   /* 31 GPR + sp + pc + pstate */
 +typedef elf_greg_t         elf_gregset_t[ELF_NGREG];
 +
++/* FP register set for core dumps (arm64: 32x128-bit vregs + fpsr/fpcr) */
++typedef struct user_fpsimd_state elf_fpregset_t;
++
 +/* Needed for core dumps */
 +#define ELF_CORE_COPY_REGS(pr_reg, regs)				\
 +	do {								\
@@ -156,6 +161,7 @@ new file mode 100644
 +#define ARCH_HAS_SETUP_ADDITIONAL_PAGES 0
 +
 +#endif /* __UM_ELF_ARM64_H */
+
 diff --git a/arch/arm64/um/asm/ptrace.h b/arch/arm64/um/asm/ptrace.h
 new file mode 100644
 --- /dev/null
@@ -188,6 +194,7 @@ new file mode 100644
 +extern void arch_switch_to(struct task_struct *to);
 +
 +#endif /* __UM_PTRACE_ARM64_H */
+
 diff --git a/arch/arm64/um/user-offsets.c b/arch/arm64/um/user-offsets.c
 new file mode 100644
 --- /dev/null
