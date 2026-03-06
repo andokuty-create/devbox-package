@@ -205,7 +205,7 @@ diff --git a/arch/arm64/um/shared/sysdep/archsetjmp.h b/arch/arm64/um/shared/sys
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/archsetjmp.h
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,29 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __ARCHSETJMP_ARM64_H
 +#define __ARCHSETJMP_ARM64_H
@@ -223,6 +223,8 @@ new file mode 100644
 + * UML uses JB_IP for the instruction pointer and JB_SP for the stack pointer
 + * in new_thread() and switch_threads().
 + */
++
++#include <setjmp.h>
 +
 +typedef unsigned long __jmp_buf[22]; /* glibc aarch64 jmp_buf size */
 +
