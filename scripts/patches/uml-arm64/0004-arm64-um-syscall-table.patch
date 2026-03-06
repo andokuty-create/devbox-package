@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/sys_call_table.c b/arch/arm64/um/sys_call_table.c
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/sys_call_table.c
-@@ -0,0 +1,36 @@
+@@ -0,0 +1,45 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * arch/arm64/um/sys_call_table.c
@@ -30,13 +30,22 @@ new file mode 100644
 +#include <linux/syscalls.h>
 +#include <asm/unistd.h>
 +
-+/* arm64 and UML-arm64 share asm-generic syscall numbers */
-+#undef __SYSCALL
-+
-+extern asmlinkage long sys_ni_syscall(void);
 +typedef long (*sys_call_ptr_t)(const struct pt_regs *);
++extern asmlinkage long sys_ni_syscall(void);
 +
-+#define __SYSCALL(nr, sym) [nr] = (sys_call_ptr_t)sym,
++/* arm64 UML overrides: signal return and mmap */
++asmlinkage long sys_rt_sigreturn(void);
++asmlinkage long sys_mmap(unsigned long addr, unsigned long len,
++			unsigned long prot, unsigned long flags,
++			unsigned long fd, unsigned long off);
++
++/* Discard compat variants — arm64 UML runs 64-bit guests only */
++#undef __SYSCALL
++#undef __SC_COMP
++#undef __SC_3264
++#define __SYSCALL(nr, sym)   [nr] = (sys_call_ptr_t)sym,
++#define __SC_COMP(nr, sym, csym) __SYSCALL(nr, sym)
++#define __SC_3264(nr, sym32, sym64) __SYSCALL(nr, sym64)
 +
 +const sys_call_ptr_t sys_call_table[] = {
 +	[0 ... 500] = (sys_call_ptr_t)sys_ni_syscall,

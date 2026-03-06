@@ -150,7 +150,7 @@ new file mode 100644
 +		int __i;						\
 +		for (__i = 0; __i < 34; __i++)				\
 +			(pr_reg)[__i] = (regs)->regs.gp[__i];		\
-+	} while (0)
++	} while (0);
 +
 +#define SET_PERSONALITY(ex)   do { } while (0)
 +#define ARCH_HAS_SETUP_ADDITIONAL_PAGES 0
