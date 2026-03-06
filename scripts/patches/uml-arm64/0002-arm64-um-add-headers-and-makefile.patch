@@ -149,10 +149,10 @@ new file mode 100644
 +	do {								\
 +		int __i;						\
 +		for (__i = 0; __i < 31; __i++)				\
-+			(pr_reg)[__i] = (regs)->regs.regs[__i];		\
-+		(pr_reg)[31] = (regs)->regs.sp;				\
-+		(pr_reg)[32] = (regs)->regs.pc;				\
-+		(pr_reg)[33] = (regs)->regs.pstate;			\
++			(pr_reg)[__i] = (regs)->regs.gp.regs[__i];	\
++		(pr_reg)[31] = (regs)->regs.gp.sp;			\
++		(pr_reg)[32] = (regs)->regs.gp.pc;			\
++		(pr_reg)[33] = (regs)->regs.gp.pstate;			\
 +	} while (0)
 +
 +#define SET_PERSONALITY(ex)   do { } while (0)
