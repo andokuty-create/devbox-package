@@ -41,12 +41,17 @@ diff --git a/arch/arm64/um/os-Linux/Makefile b/arch/arm64/um/os-Linux/Makefile
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/os-Linux/Makefile
-@@ -0,0 +1,5 @@
+@@ -0,0 +1,10 @@
 +# SPDX-License-Identifier: GPL-2.0
-+obj-y = registers.o \
++obj-y = mcontext.o \
++         registers.o \
 +         signal.o \
 +         prctl.o \
 +         uaccess.o
++
++USER_OBJS := $(obj-y)
++
++include $(srctree)/arch/um/scripts/Makefile.rules
 diff --git a/arch/arm64/um/asm/arch_regs.h b/arch/arm64/um/asm/arch_regs.h
 new file mode 100644
 --- /dev/null
