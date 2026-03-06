@@ -3,13 +3,16 @@ Subject: [PATCH 7/13] um/os-Linux/skas/process.c: arm64 compat + PTRACE_SYSCALL 
 
 --- a/arch/um/os-Linux/skas/process.c
 +++ b/arch/um/os-Linux/skas/process.c
-@@ -16,6 +16,10 @@
+@@ -16,6 +16,13 @@
  #include <as-layout.h>
  #include <init.h>
  #include <kern_util.h>
 +#include <registers.h>
 +#ifdef __aarch64__
 +#include <sys/uio.h>
++/* arm64 GP register save/restore via PTRACE_GETREGSET/SETREGSET */
++int save_registers(int pid, struct uml_pt_regs *regs);
++int restore_registers(int pid, struct uml_pt_regs *regs);
 +#endif
  #include <mem.h>
  #include <os.h>
@@ -140,3 +143,34 @@ Subject: [PATCH 7/13] um/os-Linux/skas/process.c: arm64 compat + PTRACE_SYSCALL 
  				break;
  			case SIGTRAP:
  				relay_signal(SIGTRAP, (struct siginfo *)&si, regs);
+
+@@ -476,7 +496,11 @@ static inline void arm64_neutralize_syscall(int pid, struct uml_pt_regs *regs)
+ void new_thread(void *stack, jmp_buf *buf, void (*handler)(void))
+ {
+-	(*buf)[0].JB_IP = (unsigned long) handler;
+-	(*buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE -
+-		sizeof(void *);
++#ifdef __aarch64__
++	((unsigned long *)buf)[JB_IP] = (unsigned long) handler;
++	((unsigned long *)buf)[JB_SP] = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
++#else
++	(*buf)[0].JB_IP = (unsigned long) handler;
++	(*buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
++#endif
+ }
+ 
+@@ -515,7 +541,11 @@ int start_idle_thread(void *stack, jmp_buf *switch_buf)
+ 	case INIT_JMP_NEW_THREAD:
+-		(*switch_buf)[0].JB_IP = (unsigned long) uml_finishsetup;
+-		(*switch_buf)[0].JB_SP = (unsigned long) stack +
+-			UM_THREAD_SIZE - sizeof(void *);
++#ifdef __aarch64__
++		((unsigned long *)switch_buf)[JB_IP] = (unsigned long) uml_finishsetup;
++		((unsigned long *)switch_buf)[JB_SP] = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
++#else
++		(*switch_buf)[0].JB_IP = (unsigned long) uml_finishsetup;
++		(*switch_buf)[0].JB_SP = (unsigned long) stack + UM_THREAD_SIZE - sizeof(void *);
++#endif
+ 		break;
+ 	case INIT_JMP_CALLBACK:
+ 		(*cb_proc)(cb_arg);
