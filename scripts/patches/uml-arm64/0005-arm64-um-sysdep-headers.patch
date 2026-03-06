@@ -42,7 +42,7 @@ diff --git a/arch/arm64/um/shared/sysdep/stub.h b/arch/arm64/um/shared/sysdep/st
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/shared/sysdep/stub.h
-@@ -0,0 +1,107 @@
+@@ -0,0 +1,110 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __SYSDEP_STUB_ARM64_H
 +#define __SYSDEP_STUB_ARM64_H
@@ -252,8 +252,8 @@ new file mode 100644
 +
 +typedef struct __jmp_buf jmp_buf[1];
 +
-+#define JB_IP lr   /* x30/lr field in struct __jmp_buf */
-+#define JB_SP sp   /* sp field in struct __jmp_buf */
++#define JB_IP 12  /* pc/lr in aarch64 glibc jmp_buf.__jmpbuf */
++#define JB_SP 11  /* sp in aarch64 glibc jmp_buf.__jmpbuf */
 +
 +#endif /* __ARCHSETJMP_ARM64_H */
 

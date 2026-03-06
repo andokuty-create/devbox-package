@@ -24,7 +24,7 @@ Subject: [PATCH 7/13] um/os-Linux/skas/process.c: arm64 compat + PTRACE_SYSCALL 
  
  int is_skas_winch(int pid, int fd, void *data)
  {
-@@ -33,4 +40,6 @@
+@@ -33,4 +40,5 @@
  
 +#ifndef __aarch64__  /* ptrace_reg_name is x86-only; suppress unused-fn error */
  static const char *ptrace_reg_name(int idx)

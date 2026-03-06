@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/os-Linux/registers.c b/arch/arm64/um/os-Linux/registe
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/os-Linux/registers.c
-@@ -0,0 +1,116 @@
+@@ -0,0 +1,119 @@
 +// SPDX-License-Identifier: GPL-2.0
 +/*
 + * arch/arm64/um/os-Linux/registers.c — host-side register access for UML arm64.
@@ -117,9 +117,9 @@ new file mode 100644
 +{
 +	switch (reg) {
 +	case HOST_PC:
-+		return (*buf)[0].JB_IP;
++		return (*buf)[0].__jmpbuf[JB_IP];
 +	case HOST_SP:
-+		return (*buf)[0].JB_SP;
++		return (*buf)[0].__jmpbuf[JB_SP];
 +	default:
 +		printk(UM_KERN_ERR "get_thread_reg: unknown reg %d\n", reg);
 +		return 0;
