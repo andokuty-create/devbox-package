@@ -1,0 +1,20 @@
+From: DevBox UML arm64 Port
+Subject: [PATCH] arm64: um: add asm/cpufeatures.h stub
+
+processor-generic.h includes asm/cpufeatures.h unconditionally.
+arm64 native cpufeatures.h is not suitable for UML (requires EL1 caps).
+Provide a minimal stub with just what UML needs.
+
+--- /dev/null
++++ b/arch/arm64/um/asm/cpufeatures.h
+@@ -0,0 +1,10 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * UML stub for asm/cpufeatures.h.
++ * The native arm64 version requires EL1 CPU capability infrastructure
++ * not available in UML context. UML does not use CPU feature bits directly.
++ */
++#ifndef __UM_ARM64_ASM_CPUFEATURES_H
++#define __UM_ARM64_ASM_CPUFEATURES_H
++/* intentionally empty */
++#endif

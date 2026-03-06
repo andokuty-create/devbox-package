@@ -56,7 +56,8 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
             debootstrap qemu-user-static binfmt-support \
-            libguestfs-tools qemu-utils
+            libguestfs-tools qemu-utils \
+            build-essential flex bison libssl-dev libelf-dev bc
 
       - name: Build Debian rootfs (${{ matrix.arch }})
         run: |
@@ -92,6 +93,8 @@ jobs:
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y --no-install-recommends \
+            debootstrap qemu-user-static binfmt-support \
+            libguestfs-tools qemu-utils \
             build-essential flex bison libssl-dev libelf-dev bc
 
       - name: Build UML kernel (${{ matrix.arch }})
@@ -106,7 +109,7 @@ jobs:
           path: output/linux-uml-${{ matrix.arch }}
           retention-days: 3
 
-  # ── Publish rootfs → bootstrap-YYYY-MM-DD ──────────────────────────────────
+  # ── Publish rootfs → image-YYYY-MM-DD ──────────────────────────────────
   publish-rootfs:
     name: Publish rootfs
     permissions:
@@ -129,17 +132,17 @@ jobs:
       - name: List output
         run: ls -lh output/
 
-      - name: Publish to bootstrap-latest
+      - name: Publish to image-latest
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           BUILT_AT="$(date '+%Y-%m-%d %H:%M UTC')"
-          DATE_TAG="bootstrap-$(date '+%Y-%m-%d')"
+          DATE_TAG="image-$(date '+%Y-%m-%d')"
 
-          # Update rolling bootstrap-latest tag
-          git push origin :refs/tags/bootstrap-latest 2>/dev/null || true
-          gh release create bootstrap-latest \
-            --title "Bootstrap (latest) — ${BUILT_AT}" \
+          # Update rolling image-latest tag
+          git push origin :refs/tags/image-latest 2>/dev/null || true
+          gh release create image-latest \
+            --title "Image (latest) — ${BUILT_AT}" \
             --notes "Debian bookworm rootfs for DevBox.
 
           **Built:** ${BUILT_AT}
@@ -156,7 +159,7 @@ jobs:
             --prerelease
 
           for f in output/debian-rootfs-*.img; do
-            gh release upload bootstrap-latest "$f" --clobber
+            gh release upload image-latest "$f" --clobber
           done
 
   # ── Publish kernel → kernel-vX.Y.Z ─────────────────────────────────────────

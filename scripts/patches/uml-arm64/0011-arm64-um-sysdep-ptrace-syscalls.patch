@@ -24,7 +24,9 @@ new file mode 100644
 + * HOST_SP / HOST_PC / HOST_PSTATE are defined in sysdep/ptrace_user.h.
 + */
 +
-+#define MAX_FP_NR  FP_SIZE
++/* arm64: 34 GP registers (x0-x30=31, sp=31, pc=32, pstate=33) */
++#define MAX_REG_NR  34
++#define MAX_FP_NR   FP_SIZE
 +
 +/*
 + * arm64 UML register file, stored as array of unsigned longs.
@@ -70,9 +72,7 @@ new file mode 100644
 +/* IP / SP aliases used by arch/um/kernel/ */
 +#define UPT_IP(r)      UPT_PC(r)
 +
-+/* PT_REGS_* wrappers — used by arch/um/kernel/signal.c */
-+#define PT_REGS_SP(regs)   UPT_SP(&(regs)->regs)
-+#define PT_REGS_IP(regs)   UPT_PC(&(regs)->regs)
++/* PT_REGS_SP/IP/RESTART_SYSCALL/SYSCALL_NR defined by ptrace-generic.h */
 +
 +/* Syscall restart: decrement PC by 4 (size of SVC instruction) */
 +#define PT_REGS_RESTART_SYSCALL(regs) \
