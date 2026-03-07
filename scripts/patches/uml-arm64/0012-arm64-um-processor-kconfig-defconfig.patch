@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/asm/processor.h b/arch/arm64/um/asm/processor.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/processor.h
-@@ -0,0 +1,71 @@
+@@ -0,0 +1,62 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_PROCESSOR_ARM64_H
 +#define __UM_PROCESSOR_ARM64_H
@@ -66,15 +66,6 @@ new file mode 100644
 +	else
 +		__asm__ __volatile__("yield" ::: "memory");
 +}
-+
-+/* Block native arm64/include/asm/processor.h - its task_pt_regs
-+ * uses THREAD_SIZE kernel stack trick, wrong for UML. */
-+#define __ASM_PROCESSOR_H
-+/* task_pt_regs must be defined BEFORE including processor-generic.h
-+ * because the include chain triggers expansion of current_pt_regs()
-+ * via linux/ptrace.h macros before we reach the end of this file. */
-+#undef  task_pt_regs
-+#define task_pt_regs(t) (&(t)->thread.regs)
 +
 +#endif /* __UM_PROCESSOR_ARM64_H */
 diff --git a/arch/arm64/um/Kconfig b/arch/arm64/um/Kconfig
