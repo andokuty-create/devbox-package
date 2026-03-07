@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/asm/processor.h b/arch/arm64/um/asm/processor.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/processor.h
-@@ -0,0 +1,56 @@
+@@ -0,0 +1,65 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_PROCESSOR_ARM64_H
 +#define __UM_PROCESSOR_ARM64_H
@@ -60,6 +60,15 @@ new file mode 100644
 +	else
 +		__asm__ __volatile__("yield" ::: "memory");
 +}
++
++/* Block native arm64/include/asm/processor.h from being included.
++ * It redefines task_pt_regs using the kernel stack trick, which is
++ * wrong for UML. By defining its guard here, we prevent the override. */
++#define __ASM_PROCESSOR_H
++
++/* task_pt_regs for UML: regs live in thread_struct, not on the kernel stack */
++#undef  task_pt_regs
++#define task_pt_regs(t) (&(t)->thread.regs)
 +
 +#endif /* __UM_PROCESSOR_ARM64_H */
 diff --git a/arch/arm64/um/Kconfig b/arch/arm64/um/Kconfig
