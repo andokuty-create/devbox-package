@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/asm/processor.h b/arch/arm64/um/asm/processor.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/processor.h
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,60 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_PROCESSOR_ARM64_H
 +#define __UM_PROCESSOR_ARM64_H
@@ -24,14 +24,15 @@ new file mode 100644
 +
 +#define INIT_ARCH_THREAD { .faultinfo = { 0, 0, 0 } }
 +
++/* Override native arm64 task_pt_regs BEFORE including processor-generic.h
++ * to prevent the native definition from being used anywhere */
++#undef task_pt_regs
++#define task_pt_regs(t) (&(t)->thread.regs)
++
 +/* processor-generic.h defines struct thread_struct using arch_thread above */
 +#include <asm/processor-generic.h>
 +
 +#define STACKSLOTS_PER_LINE 4
-+
-+/* task_pt_regs: get pt_regs for a given task (used by perf, ptrace) */
-+#undef task_pt_regs  /* override native arm64/include/asm/processor.h definition */
-+#define task_pt_regs(t) (&(t)->thread.regs)
 +
 +static inline void arch_flush_thread(struct arch_thread *thread)
 +{
