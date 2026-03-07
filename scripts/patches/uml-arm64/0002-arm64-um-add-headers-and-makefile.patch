@@ -117,13 +117,23 @@ diff --git a/arch/arm64/um/asm/elf.h b/arch/arm64/um/asm/elf.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/elf.h
-@@ -0,0 +1,55 @@
+@@ -0,0 +1,65 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_ELF_ARM64_H
 +#define __UM_ELF_ARM64_H
 +
 +#include <linux/elf.h>
-+#include <uapi/asm/ptrace.h>  /* struct user_fpsimd_state */
++
++/* Minimal definition - mirrors uapi/asm/ptrace.h without pulling hwcap.h */
++#ifndef __STRUCT_USER_FPSIMD_STATE
++#define __STRUCT_USER_FPSIMD_STATE
++struct user_fpsimd_state {
++	__uint128_t	vregs[32];
++	__u32		fpsr;
++	__u32		fpcr;
++	__u32		__reserved[2];
++};
++#endif
 +
 +/*
 + * ELF type / machine constant for arm64 binaries run inside UML.
