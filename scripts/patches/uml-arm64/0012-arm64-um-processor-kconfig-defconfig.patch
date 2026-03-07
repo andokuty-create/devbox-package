@@ -24,13 +24,13 @@ new file mode 100644
 +
 +#define INIT_ARCH_THREAD { .faultinfo = { 0, 0, 0 } }
 +
-+/* Override native arm64 task_pt_regs BEFORE including processor-generic.h
-+ * to prevent the native definition from being used anywhere */
-+#undef task_pt_regs
-+#define task_pt_regs(t) (&(t)->thread.regs)
-+
 +/* processor-generic.h defines struct thread_struct using arch_thread above */
 +#include <asm/processor-generic.h>
++
++/* Override native arm64 task_pt_regs (defined in arm64/include/asm/processor.h)
++ * which uses THREAD_SIZE stack trick. UML stores regs in thread_struct directly. */
++#undef task_pt_regs
++#define task_pt_regs(t) (&(t)->thread.regs)
 +
 +#define STACKSLOTS_PER_LINE 4
 +
