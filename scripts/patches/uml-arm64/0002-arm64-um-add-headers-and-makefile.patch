@@ -166,7 +166,7 @@ diff --git a/arch/arm64/um/asm/ptrace.h b/arch/arm64/um/asm/ptrace.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/ptrace.h
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,36 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +/*
 + * arm64/um/asm/ptrace.h — included as <asm/ptrace.h> for ARCH=um SUBARCH=arm64
@@ -185,6 +185,15 @@ new file mode 100644
 +
 +#define user_stack_pointer(regs)   UPT_SP(&(regs)->regs)
 +#define profile_pc(regs)           instruction_pointer(regs)
++
++/* Syscall return value / restart (used by arch/um/kernel/signal.c) */
++#define PT_REGS_SYSCALL_RET(r)    UPT_SYSCALL_RET(&(r)->regs)
++#define PT_REGS_ORIG_SYSCALL(r)   UPT_SYSCALL_NR(&(r)->regs)
++#define PT_REGS_RESTART_SYSCALL(r) UPT_RESTART_SYSCALL(&(r)->regs)
++
++/* Stack/IP for /proc and mm */
++#define KSTK_EIP(tsk)  PT_REGS_IP(&(tsk)->thread.regs)
++#define KSTK_ESP(tsk)  PT_REGS_SP(&(tsk)->thread.regs)
 +
 +/* user_mode: true when pt_regs represents a userspace context */
 +#define user_mode(r)   UPT_IS_USER(&(r)->regs)

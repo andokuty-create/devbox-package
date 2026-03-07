@@ -1,43 +1,28 @@
 From: DevBox UML arm64 Port
-Subject: [PATCH] arch/um/kernel/process.c: arm64 jmpbuf + REGS_SP compat
+Subject: [PATCH] um/kernel/process: arm64 compat (wchan JB_SP, fpregs)
 
 --- a/arch/um/kernel/process.c
 +++ b/arch/um/kernel/process.c
-@@ -157,6 +157,10 @@ int copy_thread(struct task_struct * p, const struct kernel_clone_args *args)
- 		PT_REGS_SET_SYSCALL_RETURN(&p->thread.regs, 0);
- 		if (sp != 0)
--			REGS_SP(p->thread.regs.regs.gp) = sp;
-+#ifdef __aarch64__
-+			p->thread.regs.regs.gp[HOST_SP] = sp;
-+#else
-+			REGS_SP(p->thread.regs.regs.gp) = sp;
-+#endif
- 
- 		handler = fork_handler;
- 
-@@ -271,7 +275,11 @@ unsigned long __get_wchan(struct task_struct *p)
+@@ -270,7 +270,11 @@
  	if (stack_page == 0)
  		return 0;
  
--	sp = p->thread.switch_buf->JB_SP;
 +#ifdef __aarch64__
 +	sp = ((unsigned long *)p->thread.switch_buf)[JB_SP];
 +#else
-+	sp = p->thread.switch_buf->JB_SP;
+ 	sp = p->thread.switch_buf->JB_SP;
 +#endif
  	/*
  	 * Bail if the stack pointer is below the bottom of the kernel
  	 * stack for some reason
-
-@@ -295,7 +299,11 @@ int elf_core_copy_task_fpregs(struct task_struct *t, elf_fpregset_t *fpu)
- int elf_core_copy_task_fpregs(struct task_struct *t, elf_fpregset_t *fpu)
+@@ -296,6 +300,10 @@
  {
  	int cpu = current_thread_info()->cpu;
--	return save_i387_registers(userspace_pid[cpu], (unsigned long *) fpu) == 0;
+ 
 +#ifdef __aarch64__
 +	return get_fp_registers(userspace_pid[cpu], (unsigned long *)fpu) == 0;
 +#else
-+	return save_i387_registers(userspace_pid[cpu], (unsigned long *) fpu) == 0;
+ 	return save_i387_registers(userspace_pid[cpu], (unsigned long *) fpu) == 0;
 +#endif
  }
  
