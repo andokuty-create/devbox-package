@@ -117,10 +117,14 @@ diff --git a/arch/arm64/um/asm/elf.h b/arch/arm64/um/asm/elf.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/elf.h
-@@ -0,0 +1,64 @@
+@@ -0,0 +1,71 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_ELF_ARM64_H
 +#define __UM_ELF_ARM64_H
++
++/* Block native arm64/include/asm/elf.h which includes asm/processor.h
++ * (native), causing task_pt_regs to be defined before UML overrides it. */
++#define __ASM_ELF_H
 +
 +#include <linux/elf.h>
 +
@@ -173,6 +177,9 @@ new file mode 100644
 +/* arm64 UML: no vDSO, no additional pages needed */
 +#define ARCH_HAS_SETUP_ADDITIONAL_PAGES 1
 +#define arch_setup_additional_pages(bprm, uses_interp) (0)
++
++/* arm64 is 64-bit ELF */
++#define ELF_CLASS    ELFCLASS64
 +
 +/* Page size and dynamic base for ELF loader */
 +#define ELF_EXEC_PAGESIZE   PAGE_SIZE

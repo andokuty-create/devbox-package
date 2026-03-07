@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/asm/processor.h b/arch/arm64/um/asm/processor.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/processor.h
-@@ -0,0 +1,62 @@
+@@ -0,0 +1,73 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_PROCESSOR_ARM64_H
 +#define __UM_PROCESSOR_ARM64_H
@@ -24,11 +24,22 @@ new file mode 100644
 +
 +#define INIT_ARCH_THREAD { .faultinfo = { 0, 0, 0 } }
 +
-+/* Block native arm64/include/asm/processor.h BEFORE processor-generic.h
-+ * pulls in ptrace.h chain that triggers current_pt_regs() expansion. */
++/* Block native arm64/include/asm/processor.h (uses THREAD_SIZE stack trick
++ * for task_pt_regs, wrong for UML). */
 +#define __ASM_PROCESSOR_H
++
++/* linux/ptrace.h may have been included earlier and defined:
++   current_pt_regs() = task_pt_regs(current)
++   If task_pt_regs is undefined when current_pt_regs() expands,
++   GCC errors parsing our #define task_pt_regs below.
++   Break the chain by undefining current_pt_regs now. */
++#ifdef current_pt_regs
++#undef current_pt_regs
++#endif
 +#undef  task_pt_regs
 +#define task_pt_regs(t) (&(t)->thread.regs)
++/* Restore current_pt_regs now that task_pt_regs is defined */
++#define current_pt_regs() task_pt_regs(current)
 +
 +/* processor-generic.h defines struct thread_struct using arch_thread above */
 +#include <asm/processor-generic.h>
