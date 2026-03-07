@@ -5,7 +5,7 @@ diff --git a/arch/arm64/um/asm/processor.h b/arch/arm64/um/asm/processor.h
 new file mode 100644
 --- /dev/null
 +++ b/arch/arm64/um/asm/processor.h
-@@ -0,0 +1,73 @@
+@@ -0,0 +1,71 @@
 +/* SPDX-License-Identifier: GPL-2.0 */
 +#ifndef __UM_PROCESSOR_ARM64_H
 +#define __UM_PROCESSOR_ARM64_H
@@ -38,8 +38,6 @@ new file mode 100644
 +#endif
 +#undef  task_pt_regs
 +#define task_pt_regs(t) (&(t)->thread.regs)
-+/* Restore current_pt_regs now that task_pt_regs is defined */
-+#define current_pt_regs() task_pt_regs(current)
 +
 +/* processor-generic.h defines struct thread_struct using arch_thread above */
 +#include <asm/processor-generic.h>
